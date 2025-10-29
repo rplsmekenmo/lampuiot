@@ -30,7 +30,7 @@
       font-size: 1.8rem;
     }
 
-    /* 🟢 Indikator ESP (pojok kanan atas) */
+    /* Indikator Online/Offline */
     #espStatus {
       position: fixed;
       top: 12px;
@@ -243,14 +243,18 @@
 
   <script>
     const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388";
-    const totalLamps = 5;
 
-    function toggleLamp(pin, state) {
+    // Pin virtual yang sesuai untuk tiap lampu
+    const lampPins = [0, 1, 2, 3, 4]; // V0–V4
+
+    function toggleLamp(index, state) {
+      const pin = lampPins[index];
       const value = state ? 1 : 0;
+
       fetch(`https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`)
         .then(() => {
-          const icon = document.getElementById(`icon${pin}`);
-          const checkbox = document.querySelectorAll(".switch input")[pin];
+          const icon = document.getElementById(`icon${index}`);
+          const checkbox = document.querySelectorAll(".switch input")[index];
           if (state) {
             icon.classList.add("on");
             checkbox.checked = true;
@@ -259,15 +263,15 @@
             checkbox.checked = false;
           }
         })
-        .catch(() => alert("Gagal mengirim perintah ke Blynk"));
+        .catch(() => alert("⚠️ Gagal mengirim perintah ke Blynk"));
     }
 
     function nyalakanSemua() {
-      for (let i = 0; i < totalLamps; i++) toggleLamp(i, true);
+      lampPins.forEach((_, i) => toggleLamp(i, true));
     }
 
     function matikanSemua() {
-      for (let i = 0; i < totalLamps; i++) toggleLamp(i, false);
+      lampPins.forEach((_, i) => toggleLamp(i, false));
     }
 
     function cekStatusESP() {
