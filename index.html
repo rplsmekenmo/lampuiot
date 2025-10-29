@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Lamp Controller</title>
+  <title>Smart Lamp Control</title>
   <style>
     :root {
       --accent: #ffd84c;
@@ -176,10 +176,19 @@
 
   <div class="container">
     <div class="lamp-card">
+      <div class="lamp-name">Dapur</div>
+      <div class="icon" id="icon0">💡</div>
+      <label class="switch">
+        <input id="switch0" type="checkbox" onchange="toggleLamp(0, this.checked)" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="lamp-card">
       <div class="lamp-name">Kamar 2</div>
       <div class="icon" id="icon1">💡</div>
       <label class="switch">
-        <input type="checkbox" onchange="toggleLamp(1, this.checked)" />
+        <input id="switch1" type="checkbox" onchange="toggleLamp(1, this.checked)" />
         <span class="slider"></span>
       </label>
     </div>
@@ -188,7 +197,7 @@
       <div class="lamp-name">Ruang Tamu</div>
       <div class="icon" id="icon2">💡</div>
       <label class="switch">
-        <input type="checkbox" onchange="toggleLamp(2, this.checked)" />
+        <input id="switch2" type="checkbox" onchange="toggleLamp(2, this.checked)" />
         <span class="slider"></span>
       </label>
     </div>
@@ -197,7 +206,7 @@
       <div class="lamp-name">Kamar Mandi</div>
       <div class="icon" id="icon3">💡</div>
       <label class="switch">
-        <input type="checkbox" onchange="toggleLamp(3, this.checked)" />
+        <input id="switch3" type="checkbox" onchange="toggleLamp(3, this.checked)" />
         <span class="slider"></span>
       </label>
     </div>
@@ -206,7 +215,7 @@
       <div class="lamp-name">Kamar 1</div>
       <div class="icon" id="icon4">💡</div>
       <label class="switch">
-        <input type="checkbox" onchange="toggleLamp(4, this.checked)" />
+        <input id="switch4" type="checkbox" onchange="toggleLamp(4, this.checked)" />
         <span class="slider"></span>
       </label>
     </div>
@@ -214,12 +223,13 @@
 
   <script>
     const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388";
+    const pins = [0, 1, 2, 3, 4];
 
-    function toggleLamp(index, state) {
+    function toggleLamp(pin, state) {
       const value = state ? 1 : 0;
-      fetch(`https://blynk.cloud/external/api/update?token=${TOKEN}&V${index}=${value}`)
+      fetch(`https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`)
         .then(() => {
-          const icon = document.getElementById(`icon${index}`);
+          const icon = document.getElementById(`icon${pin}`);
           if (state) icon.classList.add("on");
           else icon.classList.remove("on");
         })
@@ -227,11 +237,17 @@
     }
 
     function nyalakanSemua() {
-      [1, 2, 3, 4].forEach(i => toggleLamp(i, true));
+      pins.forEach(i => {
+        document.getElementById(`switch${i}`).checked = true;
+        toggleLamp(i, true);
+      });
     }
 
     function matikanSemua() {
-      [1, 2, 3, 4].forEach(i => toggleLamp(i, false));
+      pins.forEach(i => {
+        document.getElementById(`switch${i}`).checked = false;
+        toggleLamp(i, false);
+      });
     }
 
     function cekStatusESP() {
