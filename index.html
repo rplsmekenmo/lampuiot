@@ -1,215 +1,245 @@
 <!DOCTYPE html>
 <html lang="id">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Smart Lamp Control</title>
-		<style>
-			:root {
-				--bg-color: #0f0f0f;
-				--card-color: #1b1b1b;
-				--accent: #ffcc00;
-				--text: #f0f0f0;
-			}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Lamp Control</title>
+    <style>
+      :root {
+        --bg-color: #0f0f0f;
+        --card-color: #1b1b1b;
+        --accent: #ffcc00;
+        --text: #f0f0f0;
+      }
 
-			body {
-				background: var(--bg-color);
-				color: var(--text);
-				font-family: "Segoe UI", sans-serif;
-				text-align: center;
-				padding: 20px;
-				margin: 0;
-			}
+      body {
+        background: var(--bg-color);
+        color: var(--text);
+        font-family: "Segoe UI", sans-serif;
+        text-align: center;
+        padding: 20px;
+        margin: 0;
+      }
 
-			h1 {
-				color: var(--accent);
-				text-shadow: 0 0 10px var(--accent);
-				margin-bottom: 30px;
-				font-size: 1.8rem;
-			}
+      h1 {
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent);
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+      }
 
-			.container {
-				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-				gap: 20px;
-				max-width: 800px;
-				margin: auto;
-			}
+      .btn-all {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-bottom: 25px;
+      }
 
-			.lamp-card {
-				background: var(--card-color);
-				border-radius: 15px;
-				padding: 20px;
-				box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-				transition: 0.3s;
-			}
+      .btn-all:hover {
+        background: #ffe066;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
+      }
 
-			.lamp-card:hover {
-				transform: translateY(-5px);
-				box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
-			}
+      .container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        max-width: 800px;
+        margin: auto;
+      }
 
-			.lamp-name {
-				font-size: 1.1rem;
-				margin-bottom: 8px;
-			}
+      .lamp-card {
+        background: var(--card-color);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        transition: 0.3s;
+      }
 
-			.icon {
-				font-size: 40px;
-				margin-bottom: 10px;
-				transition: 0.3s;
-				color: #555;
-			}
+      .lamp-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+      }
 
-			.icon.on {
-				color: var(--accent);
-				text-shadow: 0 0 20px var(--accent);
-			}
+      .lamp-name {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+      }
 
-			/* Saklar */
-			.switch {
-				position: relative;
-				display: inline-block;
-				width: 65px;
-				height: 36px;
-			}
+      .icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+        transition: 0.3s;
+        color: #555;
+      }
 
-			.switch input {
-				display: none;
-			}
+      .icon.on {
+        color: var(--accent);
+        text-shadow: 0 0 20px var(--accent);
+      }
 
-			.slider {
-				position: absolute;
-				cursor: pointer;
-				top: 0;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				background-color: #555;
-				transition: 0.3s;
-				border-radius: 34px;
-			}
+      /* Saklar */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 65px;
+        height: 36px;
+      }
 
-			.slider:before {
-				position: absolute;
-				content: "";
-				height: 28px;
-				width: 28px;
-				left: 4px;
-				bottom: 4px;
-				background-color: white;
-				transition: 0.3s;
-				border-radius: 50%;
-			}
+      .switch input {
+        display: none;
+      }
 
-			input:checked + .slider {
-				background-color: var(--accent);
-				box-shadow: 0 0 15px var(--accent);
-			}
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #555;
+        transition: 0.3s;
+        border-radius: 34px;
+      }
 
-			input:checked + .slider:before {
-				transform: translateX(28px);
-			}
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 28px;
+        width: 28px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+      }
 
-			/* Responsive */
-			@media (max-width: 768px) {
-				h1 {
-					font-size: 1.5rem;
-				}
-				.icon {
-					font-size: 35px;
-				}
-				.lamp-card {
-					padding: 15px;
-				}
-			}
+      input:checked + .slider {
+        background-color: var(--accent);
+        box-shadow: 0 0 15px var(--accent);
+      }
 
-			@media (max-width: 480px) {
-				.container {
-					grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-					gap: 15px;
-				}
-				.switch {
-					width: 55px;
-					height: 30px;
-				}
-				.slider:before {
-					width: 24px;
-					height: 24px;
-				}
-				.lamp-name {
-					font-size: 1rem;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<h1>💡 Smart Lamp Control</h1>
+      input:checked + .slider:before {
+        transform: translateX(28px);
+      }
 
-		<div class="container">
-			<div class="lamp-card">
-				<div class="lamp-name">Dapur</div>
-				<div class="icon" id="icon0">💡</div>
-				<label class="switch">
-					<input type="checkbox" onchange="toggleLamp(0, this.checked)" />
-					<span class="slider"></span>
-				</label>
-			</div>
+      /* Responsive */
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+        .icon {
+          font-size: 35px;
+        }
+        .lamp-card {
+          padding: 15px;
+        }
+      }
 
-			<div class="lamp-card">
-				<div class="lamp-name">kamar 2</div>
-				<div class="icon" id="icon1">💡</div>
-				<label class="switch">
-					<input type="checkbox" onchange="toggleLamp(1, this.checked)" />
-					<span class="slider"></span>
-				</label>
-			</div>
+      @media (max-width: 480px) {
+        .container {
+          grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+          gap: 15px;
+        }
+        .switch {
+          width: 55px;
+          height: 30px;
+        }
+        .slider:before {
+          width: 24px;
+          height: 24px;
+        }
+        .lamp-name {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>💡 Smart Lamp Control</h1>
 
-			<div class="lamp-card">
-				<div class="lamp-name">Ruang Tamu</div>
-				<div class="icon" id="icon2">💡</div>
-				<label class="switch">
-					<input type="checkbox" onchange="toggleLamp(2, this.checked)" />
-					<span class="slider"></span>
-				</label>
-			</div>
+    <button class="btn-all" onclick="nyalakanSemua()">🔆 Nyalakan Semua</button>
 
-			<div class="lamp-card">
-				<div class="lamp-name">Kamar Mandi</div>
-				<div class="icon" id="icon3">💡</div>
-				<label class="switch">
-					<input type="checkbox" onchange="toggleLamp(3, this.checked)" />
-					<span class="slider"></span>
-				</label>
-			</div>
+    <div class="container">
+      <div class="lamp-card">
+        <div class="lamp-name">Dapur</div>
+        <div class="icon" id="icon0">💡</div>
+        <label class="switch">
+          <input type="checkbox" onchange="toggleLamp(0, this.checked)" />
+          <span class="slider"></span>
+        </label>
+      </div>
 
-			<div class="lamp-card">
-				<div class="lamp-name">Kamar 1</div>
-				<div class="icon" id="icon4">💡</div>
-				<label class="switch">
-					<input type="checkbox" onchange="toggleLamp(4, this.checked)" />
-					<span class="slider"></span>
-				</label>
-			</div>
-		</div>
+      <div class="lamp-card">
+        <div class="lamp-name">Kamar 2</div>
+        <div class="icon" id="icon1">💡</div>
+        <label class="switch">
+          <input type="checkbox" onchange="toggleLamp(1, this.checked)" />
+          <span class="slider"></span>
+        </label>
+      </div>
 
-		<script>
-			const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388"; // Ganti dengan token kamu
+      <div class="lamp-card">
+        <div class="lamp-name">Ruang Tamu</div>
+        <div class="icon" id="icon2">💡</div>
+        <label class="switch">
+          <input type="checkbox" onchange="toggleLamp(2, this.checked)" />
+          <span class="slider"></span>
+        </label>
+      </div>
 
-			function toggleLamp(pin, state) {
-				const value = state ? 1 : 0;
-				fetch(
-					`https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`
-				)
-					.then(() => {
-						const icon = document.getElementById(`icon${pin}`);
-						if (state) icon.classList.add("on");
-						else icon.classList.remove("on");
-					})
-					.catch(() => alert("Gagal mengirim perintah ke Blynk"));
-			}
-		</script>
-	</body>
+      <div class="lamp-card">
+        <div class="lamp-name">Kamar Mandi</div>
+        <div class="icon" id="icon3">💡</div>
+        <label class="switch">
+          <input type="checkbox" onchange="toggleLamp(3, this.checked)" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="lamp-card">
+        <div class="lamp-name">Kamar 1</div>
+        <div class="icon" id="icon4">💡</div>
+        <label class="switch">
+          <input type="checkbox" onchange="toggleLamp(4, this.checked)" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <script>
+      const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388"; // token kamu
+      const totalLamps = 5;
+
+      function toggleLamp(pin, state) {
+        const value = state ? 1 : 0;
+        fetch(`https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`)
+          .then(() => {
+            const icon = document.getElementById(`icon${pin}`);
+            const checkbox = document.querySelectorAll(".switch input")[pin];
+            if (state) {
+              icon.classList.add("on");
+              checkbox.checked = true;
+            } else {
+              icon.classList.remove("on");
+              checkbox.checked = false;
+            }
+          })
+          .catch(() => alert("Gagal mengirim perintah ke Blynk"));
+      }
+
+      function nyalakanSemua() {
+        for (let i = 0; i < totalLamps; i++) {
+          toggleLamp(i, true);
+        }
+      }
+    </script>
+  </body>
 </html>
-
-
