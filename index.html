@@ -3,73 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Lamp Control</title>
+  <title>Smart Lamp Controller</title>
   <style>
     :root {
-      --bg-color: #0f0f0f;
-      --card-color: #1b1b1b;
-      --accent: #ffcc00;
-      --text: #f0f0f0;
-      --online: #00ff80;
-      --offline: #ff5555;
+      --accent: #ffd84c;
+      --bg: #0e0e0e;
+      --card: #1a1a1a;
+      --text: #f2f2f2;
+      --online: #00ff88;
+      --offline: #ff4c4c;
     }
 
     body {
-      background: var(--bg-color);
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
       color: var(--text);
-      font-family: "Segoe UI", sans-serif;
-      text-align: center;
-      padding: 20px;
       margin: 0;
+      padding: 20px;
+      text-align: center;
     }
 
     h1 {
       color: var(--accent);
-      text-shadow: 0 0 10px var(--accent);
-      margin-bottom: 30px;
-      font-size: 1.8rem;
+      text-shadow: 0 0 12px var(--accent);
+      margin-bottom: 25px;
     }
 
-    /* Indikator Online/Offline */
+    /* indikator status */
     #espStatus {
       position: fixed;
-      top: 12px;
+      top: 10px;
       right: 15px;
       font-size: 0.9rem;
-      opacity: 0.7;
-      font-weight: 500;
-      transition: 0.3s;
-      z-index: 100;
+      opacity: 0.8;
+      z-index: 99;
     }
+    #espStatus.online { color: var(--online); }
+    #espStatus.offline { color: var(--offline); }
 
-    #espStatus.online {
-      color: var(--online);
-      text-shadow: 0 0 5px var(--online);
-    }
-
-    #espStatus.offline {
-      color: var(--offline);
-      text-shadow: 0 0 5px var(--offline);
-    }
-
+    /* tombol kontrol utama */
     .control-buttons {
       display: flex;
       justify-content: center;
       gap: 15px;
-      margin-bottom: 30px;
       flex-wrap: wrap;
+      margin-bottom: 30px;
     }
 
     .btn-main {
       background: var(--accent);
       color: #000;
       border: none;
-      padding: 12px 25px;
+      padding: 10px 22px;
       border-radius: 10px;
-      font-size: 1rem;
-      font-weight: bold;
+      font-weight: 600;
       cursor: pointer;
       transition: 0.3s;
+    }
+
+    .btn-main:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 216, 76, 0.5);
     }
 
     .btn-main.off {
@@ -77,22 +71,18 @@
       color: #fff;
     }
 
-    .btn-main:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
-    }
-
+    /* grid tata letak lampu */
     .container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
-      max-width: 800px;
-      margin: auto;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 25px;
+      max-width: 850px;
+      margin: 0 auto;
     }
 
     .lamp-card {
-      background: var(--card-color);
-      border-radius: 15px;
+      background: var(--card);
+      border-radius: 18px;
       padding: 20px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
       transition: 0.3s;
@@ -100,32 +90,34 @@
 
     .lamp-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+      box-shadow: 0 0 20px rgba(255, 216, 76, 0.3);
     }
 
     .lamp-name {
       font-size: 1.1rem;
-      margin-bottom: 8px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
     }
 
     .icon {
-      font-size: 40px;
-      margin-bottom: 10px;
+      font-size: 42px;
+      margin-bottom: 12px;
       transition: 0.3s;
       color: #555;
     }
 
     .icon.on {
       color: var(--accent);
-      text-shadow: 0 0 20px var(--accent);
+      text-shadow: 0 0 15px var(--accent);
     }
 
-    /* Saklar */
+    /* saklar toggle */
     .switch {
       position: relative;
       display: inline-block;
       width: 65px;
-      height: 36px;
+      height: 34px;
     }
 
     .switch input {
@@ -135,10 +127,7 @@
     .slider {
       position: absolute;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background-color: #555;
       transition: 0.3s;
       border-radius: 34px;
@@ -147,13 +136,13 @@
     .slider:before {
       position: absolute;
       content: "";
-      height: 28px;
-      width: 28px;
+      height: 26px;
+      width: 26px;
       left: 4px;
       bottom: 4px;
       background-color: white;
-      transition: 0.3s;
       border-radius: 50%;
+      transition: 0.3s;
     }
 
     input:checked + .slider {
@@ -162,31 +151,22 @@
     }
 
     input:checked + .slider:before {
-      transform: translateX(28px);
+      transform: translateX(30px);
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      h1 { font-size: 1.5rem; }
-      .icon { font-size: 35px; }
-      .lamp-card { padding: 15px; }
-      #espStatus { font-size: 0.8rem; }
-    }
-
+    /* responsif */
     @media (max-width: 480px) {
-      .container {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
-      }
-      .switch { width: 55px; height: 30px; }
-      .slider:before { width: 24px; height: 24px; }
+      .container { gap: 18px; }
+      .lamp-card { padding: 15px; }
+      .icon { font-size: 35px; }
       .lamp-name { font-size: 1rem; }
+      .switch { width: 55px; height: 30px; }
+      .slider:before { width: 22px; height: 22px; }
     }
   </style>
 </head>
 <body>
   <div id="espStatus" class="offline">🔴 Offline</div>
-
   <h1>💡 Smart Lamp Control</h1>
 
   <div class="control-buttons">
@@ -195,15 +175,6 @@
   </div>
 
   <div class="container">
-    <div class="lamp-card">
-      <div class="lamp-name">Kamar 1</div>
-      <div class="icon" id="icon0">💡</div>
-      <label class="switch">
-        <input type="checkbox" onchange="toggleLamp(0, this.checked)" />
-        <span class="slider"></span>
-      </label>
-    </div>
-
     <div class="lamp-card">
       <div class="lamp-name">Kamar 2</div>
       <div class="icon" id="icon1">💡</div>
@@ -223,7 +194,7 @@
     </div>
 
     <div class="lamp-card">
-      <div class="lamp-name">Dapur</div>
+      <div class="lamp-name">Kamar Mandi</div>
       <div class="icon" id="icon3">💡</div>
       <label class="switch">
         <input type="checkbox" onchange="toggleLamp(3, this.checked)" />
@@ -232,7 +203,7 @@
     </div>
 
     <div class="lamp-card">
-      <div class="lamp-name">Kamar Mandi</div>
+      <div class="lamp-name">Kamar 1</div>
       <div class="icon" id="icon4">💡</div>
       <label class="switch">
         <input type="checkbox" onchange="toggleLamp(4, this.checked)" />
@@ -244,34 +215,23 @@
   <script>
     const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388";
 
-    // Pin virtual yang sesuai untuk tiap lampu
-    const lampPins = [0, 1, 2, 3, 4]; // V0–V4
-
     function toggleLamp(index, state) {
-      const pin = lampPins[index];
       const value = state ? 1 : 0;
-
-      fetch(`https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`)
+      fetch(`https://blynk.cloud/external/api/update?token=${TOKEN}&V${index}=${value}`)
         .then(() => {
           const icon = document.getElementById(`icon${index}`);
-          const checkbox = document.querySelectorAll(".switch input")[index];
-          if (state) {
-            icon.classList.add("on");
-            checkbox.checked = true;
-          } else {
-            icon.classList.remove("on");
-            checkbox.checked = false;
-          }
+          if (state) icon.classList.add("on");
+          else icon.classList.remove("on");
         })
         .catch(() => alert("⚠️ Gagal mengirim perintah ke Blynk"));
     }
 
     function nyalakanSemua() {
-      lampPins.forEach((_, i) => toggleLamp(i, true));
+      [1, 2, 3, 4].forEach(i => toggleLamp(i, true));
     }
 
     function matikanSemua() {
-      lampPins.forEach((_, i) => toggleLamp(i, false));
+      [1, 2, 3, 4].forEach(i => toggleLamp(i, false));
     }
 
     function cekStatusESP() {
