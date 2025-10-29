@@ -10,6 +10,8 @@
       --card-color: #1b1b1b;
       --accent: #ffcc00;
       --text: #f0f0f0;
+      --online: #00ff80;
+      --offline: #ff4444;
     }
 
     body {
@@ -24,8 +26,31 @@
     h1 {
       color: var(--accent);
       text-shadow: 0 0 10px var(--accent);
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       font-size: 1.8rem;
+    }
+
+    /* Status ESP */
+    .status {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      transition: 0.3s;
+    }
+
+    .online {
+      background: var(--online);
+      color: #000;
+      box-shadow: 0 0 15px var(--online);
+    }
+
+    .offline {
+      background: var(--offline);
+      color: #fff;
+      box-shadow: 0 0 15px var(--offline);
     }
 
     /* Tombol utama */
@@ -144,15 +169,9 @@
 
     /* Responsive */
     @media (max-width: 768px) {
-      h1 {
-        font-size: 1.5rem;
-      }
-      .icon {
-        font-size: 35px;
-      }
-      .lamp-card {
-        padding: 15px;
-      }
+      h1 { font-size: 1.5rem; }
+      .icon { font-size: 35px; }
+      .lamp-card { padding: 15px; }
     }
 
     @media (max-width: 480px) {
@@ -160,22 +179,16 @@
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 15px;
       }
-      .switch {
-        width: 55px;
-        height: 30px;
-      }
-      .slider:before {
-        width: 24px;
-        height: 24px;
-      }
-      .lamp-name {
-        font-size: 1rem;
-      }
+      .switch { width: 55px; height: 30px; }
+      .slider:before { width: 24px; height: 24px; }
+      .lamp-name { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
   <h1>💡 Smart Lamp Control</h1>
+
+  <div id="espStatus" class="status offline">🔴 Offline</div>
 
   <div class="control-buttons">
     <button class="btn-main" onclick="nyalakanSemua()">🔆 Nyalakan Semua</button>
@@ -230,7 +243,7 @@
   </div>
 
   <script>
-    const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388"; // Ganti token sesuai Blynk kamu
+    const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388"; // Ganti dengan token kamu
     const totalLamps = 5;
 
     function toggleLamp(pin, state) {
@@ -261,6 +274,30 @@
         toggleLamp(i, false);
       }
     }
+
+    // 🔍 Cek status ESP online/offline
+    function cekStatusESP() {
+      fetch(`https://blynk.cloud/external/api/isHardwareConnected?token=${TOKEN}`)
+        .then(res => res.text())
+        .then(status => {
+          const statusEl = document.getElementById("espStatus");
+          if (status.includes("true")) {
+            statusEl.textContent = "🟢 Online";
+            statusEl.className = "status online";
+          } else {
+            statusEl.textContent = "🔴 Offline";
+            statusEl.className = "status offline";
+          }
+        })
+        .catch(() => {
+          const statusEl = document.getElementById("espStatus");
+          statusEl.textContent = "⚠️ Tidak Terhubung";
+          statusEl.className = "status offline";
+        });
+    }
+
+    cekStatusESP(); // Cek awal
+    setInterval(cekStatusESP, 5000); // Update tiap 5 detik
   </script>
 </body>
 </html>
