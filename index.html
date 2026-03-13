@@ -3,13 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Lamp Control</title>
+    <title>Smart Lamp & Sensor Control</title>
     <style>
       :root {
         --bg-color: #0f0f0f;
         --card-color: #1b1b1b;
         --accent: #ffcc00;
         --text: #f0f0f0;
+        --temp-color: #ff6b6b;
+        --hum-color: #4ecdc4;
       }
 
       body {
@@ -43,13 +45,8 @@
         margin-right: 5px;
       }
 
-      .online {
-        background-color: #00ff00;
-      }
-
-      .offline {
-        background-color: #ff0000;
-      }
+      .online { background-color: #00ff00; }
+      .offline { background-color: #ff0000; }
 
       .buttons {
         margin-bottom: 30px;
@@ -75,13 +72,8 @@
         color: #fff;
       }
 
-      .on-all:hover {
-        background-color: #ffdf40;
-      }
-
-      .off-all:hover {
-        background-color: #444;
-      }
+      .on-all:hover { background-color: #ffdf40; }
+      .off-all:hover { background-color: #444; }
 
       .container {
         display: grid;
@@ -91,6 +83,7 @@
         margin: auto;
       }
 
+      /* Lamp Card Styles */
       .lamp-card {
         background: var(--card-color);
         border-radius: 18px;
@@ -128,17 +121,12 @@
         height: 36px;
       }
 
-      .switch input {
-        display: none;
-      }
+      .switch input { display: none; }
 
       .slider {
         position: absolute;
         cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         background-color: #555;
         transition: 0.3s;
         border-radius: 34px;
@@ -165,13 +153,60 @@
         transform: translateX(28px);
       }
 
+      /* 🔥 Sensor Card Styles (DHT11) */
+      .sensor-card {
+        background: var(--card-color);
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        grid-column: 1 / -1; /* Full width */
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+
+      .sensor-item {
+        text-align: center;
+        min-width: 120px;
+      }
+
+      .sensor-icon {
+        font-size: 40px;
+        margin-bottom: 8px;
+      }
+
+      .sensor-label {
+        font-size: 0.95rem;
+        color: #aaa;
+        margin-bottom: 5px;
+      }
+
+      .sensor-value {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .temp-value { color: var(--temp-color); }
+      .hum-value { color: var(--hum-color); }
+
+      .sensor-unit {
+        font-size: 1rem;
+        color: #888;
+      }
+
+      .last-update {
+        font-size: 0.8rem;
+        color: #666;
+        margin-top: 10px;
+        grid-column: 1 / -1;
+      }
+
       @media (max-width: 768px) {
-        h1 {
-          font-size: 1.6rem;
-        }
-        .lamp-card {
-          padding: 18px;
-        }
+        h1 { font-size: 1.6rem; }
+        .lamp-card { padding: 18px; }
+        .sensor-card { gap: 25px; }
+        .sensor-value { font-size: 1.7rem; }
       }
 
       @media (max-width: 480px) {
@@ -179,8 +214,11 @@
           grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
           gap: 15px;
         }
-        .lamp-name {
-          font-size: 1rem;
+        .lamp-name { font-size: 1rem; }
+        .sensor-card { 
+          flex-direction: column; 
+          gap: 20px;
+          padding: 18px;
         }
       }
     </style>
@@ -191,15 +229,32 @@
       <span id="status-text">Offline</span>
     </div>
 
-    <h1>💡 Smart Lamp Control</h1>
+    <h1>💡 Smart Lamp & 🌡️ Sensor Control</h1>
 
     <div class="buttons">
       <button class="on-all" onclick="toggleAll(true)">🌞 Nyalakan Semua</button>
       <button class="off-all" onclick="toggleAll(false)">🌑 Matikan Semua</button>
     </div>
 
+    <!-- 🔥 DHT11 Sensor Display -->
     <div class="container">
-      <!-- Urutan UI sudah disesuaikan -->
+      <div class="sensor-card">
+        <div class="sensor-item">
+          <div class="sensor-icon">🌡️</div>
+          <div class="sensor-label">Suhu</div>
+          <div class="sensor-value temp-value" id="temp-value">--</div>
+          <div class="sensor-unit">°C</div>
+        </div>
+        <div class="sensor-item">
+          <div class="sensor-icon">💧</div>
+          <div class="sensor-label">Kelembapan</div>
+          <div class="sensor-value hum-value" id="hum-value">--</div>
+          <div class="sensor-unit">%</div>
+        </div>
+        <div class="last-update" id="last-update">Memuat data...</div>
+      </div>
+
+      <!-- Lamp Cards (Tetap seperti sebelumnya) -->
       <div class="lamp-card">
         <div class="lamp-name">Ruang Tamu</div>
         <div class="icon" id="icon2">💡</div>
@@ -247,27 +302,72 @@
     </div>
 
     <script>
-      const TOKEN = "pVGfxPE76jiR8CV3POTuKffwEQ2iq388";
+      const TOKEN = "NKmezK24n3jRLMfa5YaP62Wupuu6VtVx";
       const pins = [0, 1, 2, 3, 4];
+      
+      // 🔧 Konfigurasi Virtual Pin DHT11 (sesuaikan dengan project Blynk kamu!)
+      const TEMP_PIN = 5;   // Virtual pin untuk suhu (V5)
+      const HUM_PIN = 6;    // Virtual pin untuk kelembapan (V6)
 
+      // Fungsi toggle lamp (sama seperti sebelumnya)
       async function toggleLamp(pin, state) {
         const value = state ? 1 : 0;
-        await fetch(
-          `https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`
-        );
-        const icon = document.getElementById(`icon${pin}`);
-        icon.classList.toggle("on", state);
+        try {
+          await fetch(
+            `https://blynk.cloud/external/api/update?token=${TOKEN}&V${pin}=${value}`
+          );
+          const icon = document.getElementById(`icon${pin}`);
+          icon.classList.toggle("on", state);
+        } catch (err) {
+          console.error("Gagal toggle lamp:", err);
+        }
       }
 
       async function toggleAll(state) {
         for (let pin of pins) {
           await toggleLamp(pin, state);
-          document.querySelector(
+          const checkbox = document.querySelector(
             `input[onchange="toggleLamp(${pin}, this.checked)"]`
-          ).checked = state;
+          );
+          if (checkbox) checkbox.checked = state;
         }
       }
 
+      // 🔥 Fungsi baru: Ambil data sensor dari Blynk
+      async function fetchSensorData() {
+        try {
+          // Ambil suhu dari V5
+          const tempRes = await fetch(
+            `https://blynk.cloud/external/api/get?token=${TOKEN}&V${TEMP_PIN}`
+          );
+          const tempData = await tempRes.text();
+          
+          // Ambil kelembapan dari V6
+          const humRes = await fetch(
+            `https://blynk.cloud/external/api/get?token=${TOKEN}&V${HUM_PIN}`
+          );
+          const humData = await humRes.text();
+
+          // Update UI (cek apakah data valid)
+          if (tempData && tempData !== "null") {
+            document.getElementById("temp-value").textContent = parseFloat(tempData).toFixed(1);
+          }
+          if (humData && humData !== "null") {
+            document.getElementById("hum-value").textContent = parseFloat(humData).toFixed(1);
+          }
+          
+          // Update timestamp
+          const now = new Date();
+          document.getElementById("last-update").textContent = 
+            `Terakhir update: ${now.toLocaleTimeString("id-ID")}`;
+          
+        } catch (err) {
+          console.error("Gagal ambil data sensor:", err);
+          document.getElementById("last-update").textContent = "Gagal memuat data";
+        }
+      }
+
+      // Fungsi cek status hardware (sama seperti sebelumnya)
       async function checkStatus() {
         try {
           const res = await fetch(
@@ -289,8 +389,12 @@
         }
       }
 
+      // 🔥 Inisialisasi: Jalankan polling sensor & status
       checkStatus();
-      setInterval(checkStatus, 5000);
+      fetchSensorData(); // Ambil data sensor saat pertama load
+      
+      setInterval(checkStatus, 5000);      // Cek status tiap 5 detik
+      setInterval(fetchSensorData, 3000);  // Update sensor tiap 3 detik
     </script>
   </body>
 </html>
